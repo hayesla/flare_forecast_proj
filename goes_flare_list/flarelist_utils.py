@@ -37,11 +37,11 @@ def get_swpc_reports(trange, savedir=None):
     urls = file_scraper_swpc.filelist(trange)
     return download_urls(urls, savedir)
 
-
     
 def get_ngdc_reports(timerange, savedir=None):
     """
     Function to search and download the NOAA NDGC reports.
+    The reports are available from 1975 - 2017-06-28.
 
     Parameters
     ----------
