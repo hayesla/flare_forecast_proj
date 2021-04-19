@@ -181,7 +181,7 @@ def read_swpc_reports(file):
                 event_list["goes_class_ind"] = line[58]
                 event_list["goes_class"] = line[58:62]
                 event_list["integrated_flux"] = line[66:73]
-                event_list["noaa_ar"] = "1"+line[76:80]
+                event_list["noaa_ar"] = "1"+line[76:80] if (line[76:80]!= "    ") else line[75:80]
                 flare_list.append(event_list)
 
     return pd.DataFrame(flare_list)
