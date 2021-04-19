@@ -1,11 +1,8 @@
-import numpy as np 
 from sunpy.util import scraper
-from sunpy.time import parse_time, TimeRange
+from sunpy.time import TimeRange
 import urllib
 import pandas as pd
-
-
-savedir = "/Users/laurahayes/ml_project_flares/flare_analysis/goes_flare_list/goes_files/"
+import os 
 
 def get_swpc_reports(trange, savedir=None):
     """
@@ -35,6 +32,7 @@ def get_swpc_reports(trange, savedir=None):
     file_scraper_swpc = scraper.Scraper(file_pattern_swpc)
 
     urls = file_scraper_swpc.filelist(trange)
+    urls.sort()
     return download_urls(urls, savedir)
 
     
@@ -67,6 +65,7 @@ def get_ngdc_reports(timerange, savedir=None):
 
     file_scraper_ngdc = scraper.Scraper(file_pattern_ngdc)
     urls = file_scraper_ngdc.filelist(timerange)
+    urls.sort()
     return download_urls(urls, savedir)
     
 
@@ -87,7 +86,11 @@ def download_urls(urls, savedir):
     """
     results = []
     if len(urls) != 0:
+
         for u in urls:
+            if os.path.exists(savedir+u.split("/")[-1]):
+                results.append(savedir+u.split("/")[-1])
+                continue
             try:
                 res = urllib.request.urlretrieve(u, savedir+u.split("/")[-1])
                 results.append(res[0])
@@ -120,18 +123,21 @@ def read_ngdc_goes_reports(file):
     with open(file, "r") as f:
         flare_list = []
         for line in f.readlines():
-            event_list = {}
-            event_list["data_code"] = line[0:5]
-            event_list["date"] = line[5:11]
-            event_list["start_time"] = line[13:17]
-            event_list["end_time"] = line[18:22]
-            event_list["max_time"] = line[23:27]
-            event_list["position"] = line[28:34]
-            event_list["goes_class"] = line[59:62]+"."+line[62]
-            event_list["goes_sat"] = line[67:70]
-            event_list["integrated_flux"] = line[72:79]
-            event_list["noaa_ar"] = line[80:85]
-            flare_list.append(event_list)
+            if len(line)>79:
+                event_list = {}
+                event_list["data_code"] = line[0:5]
+                event_list["date"] = "20"+line[5:11]
+                event_list["start_time"] = line[13:17]
+                event_list["end_time"] = line[18:22]
+                event_list["max_time"] = line[23:27]
+                event_list["position"] = line[28:34]
+                event_list["goes_class_ind"] = line[59]
+                event_list["goes_class"] = line[59]+line[61]+"."+line[62]
+                event_list["goes_sat"] = line[67:70]
+                event_list["integrated_flux"] = line[72:79]
+                if len(line)>=80:
+                    event_list["noaa_ar"] = line[80:85]
+                flare_list.append(event_list)
 
     return pd.DataFrame(flare_list)
 
@@ -172,9 +178,10 @@ def read_swpc_reports(file):
                 event_list["end_time"] = line[28:32]
                 event_list["goes_sat"] = line[34:37]
                 event_list["goes_channel"] = line[48:52]
+                event_list["goes_class_ind"] = line[58]
                 event_list["goes_class"] = line[58:62]
                 event_list["integrated_flux"] = line[66:73]
-                event_list["swpc_ar"] = line[76:80]
+                event_list["noaa_ar"] = "1"+line[76:80]
                 flare_list.append(event_list)
 
     return pd.DataFrame(flare_list)
