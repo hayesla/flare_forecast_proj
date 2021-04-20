@@ -89,8 +89,10 @@ flare_list_c = flare_list[flare_list["goes_class_ind"].isin(["X", "M", "C"])]
 flare_list_c.reset_index(inplace=True)
 
 
-
-
+flare_list_c["tstart_datetime"] = pd.to_datetime(flare_list_c.date+flare_list_c.start_time, format="%Y%m%d%H%M")
+flare_list_c["max_time"] = flare_list_c["max_time"].replace("////", "0000")
+flare_list_c["tpeak_datetime"] = pd.to_datetime(flare_list_c.date+flare_list_c.max_time, format="%Y%m%d%H%M")
+flare_list_c["tend_datetime"] = pd.to_datetime(flare_list_c.date+flare_list_c.end_time, format="%Y%m%d%H%M")
 
 
 
