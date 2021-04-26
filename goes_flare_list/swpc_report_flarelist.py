@@ -7,7 +7,7 @@ import tarfile
 from flarelist_utils import read_swpc_reports, read_ngdc_goes_reports
 from dateutil.relativedelta import relativedelta
 import pandas as pd 
-
+import datetime
 
 def get_yearly_tar_files():
 	"""
@@ -30,25 +30,55 @@ def get_yearly_tar_files():
 		my_tar.close()
 
 
-filedir = "./goes_files/%Y_events/%Y*events*"#%Y%m%devents.txt"
-timerange = TimeRange("2010-01-01", "2018-12-31")
-years = [timerange.start.datetime + relativedelta(years=i) for i in range(9)]
-all_files = []
-for y in years:
-	all_files += glob.glob(y.strftime(filedir))
+def get_swpc_flarelist():
+	"""
+	Function to read in all SWPC daily reports and save flarelist
+	as a csv for flares >=C1.0.
 
-all_files.sort()
+	The flarelist is saved to "swpc_event_list.csv"
+	"""
+	filedir = "./goes_files/%Y_events/%Y%m%devents.txt"
+	timerange = TimeRange("2010-01-01", "2018-12-31")
+	t0 = timerange.start.datetime
+	files = [t0.strftime(filedir)]
+	while timerange.end.datetime>t0:
+		t0 = t0 + relativedelta(days=1)
+		files.append(t0.strftime(filedir))
 
-df_flares = read_swpc_reports(all_files[0])
-for f in all_files[1:]:
-	df = read_swpc_reports(f)
-	df_flares = df_flares.append(df)
-df_flares.reset_index(inplace=True, drop=True)
-df_flares["ts"] = df_flares.date + df_flares.start_time
-df_flares.drop_duplicates(subset="ts")
+	files.sort()
 
-df_flares_c = df_flares[df_flares["goes_class_ind"].isin(["C", "X", "M"])]
+	df_flares = read_swpc_reports(files[0])
+	for f in files[1:]:
+		df = read_swpc_reports(f)
+		df_flares = df_flares.append(df)
+	df_flares.reset_index(inplace=True, drop=True)
+	df_flares["ts"] = df_flares.date + df_flares.start_time
+	df_flares = df_flares.drop_duplicates(subset="ts")
 
+	df_flares_c = df_flares[df_flares["goes_class_ind"].isin(["C", "X", "M"])]
+	df_flares_c.reset_index(inplace=True, drop=True)
+	df_flares_c.to_csv("swpc_event_list.csv", index_label=False)
+
+def test_files_missing():
+	"""
+	Print missing files - if any missing check solarmoniter.
+	"""
+	filedir = "./goes_files/%Y_events/%Y%m%devents.txt"
+	t0 = timerange.start.datetime
+	days = [t0]
+	while timerange.end.datetime > t0:
+		t0 = t0 + relativedelta(days=1)
+		days.append(t0)
+
+	missing_files = []
+	for d in days:
+		if not os.path.exists(d.strftime(filedir)):
+			missing_files.append(d.strftime(filedir))
+	print(missing_files)
+
+
+
+## Testing differences
 
 def get_yearly_swpc(year):
 	all_files = []
@@ -70,7 +100,6 @@ def get_yearly_ngdc(year):
 	df["ts"] = df.date + df.start_time
 	df.drop_duplicates(subset="ts")
 	return df[df["goes_class_ind"].isin(["X", "M", "C"])]
-
 
 
 def print_flares(df):
