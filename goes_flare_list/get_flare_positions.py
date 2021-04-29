@@ -78,24 +78,24 @@ def get_df(url, retry_count=1):
         return url
 
 
+def get_pos_df():
+    events_df = get_df(urls[0])
+    events_df.to_csv("event_loc_info.csv", index_label=True)
+    errors = []
+    for i in range(1091, len(urls)):
+        print(i)
+        res = get_df(urls[i])
+        if isinstance(res, pd.DataFrame):
+            with open("event_loc_info.csv", "a") as f:
+                res.to_csv(f, header=False)
+            events_df = events_df.append(res)
 
-events_df = get_df(urls[0])
-events_df.to_csv("event_loc_info.csv", index_label=True)
-errors = []
-for i in range(1091, len(urls)):
-    print(i)
-    res = get_df(urls[i])
-    if isinstance(res, pd.DataFrame):
-        with open("event_loc_info.csv", "a") as f:
-            res.to_csv(f, header=False)
-        events_df = events_df.append(res)
-
-    elif res is None:
-        print("None there")
-        errors.append("None")
-    else:
-        print("theres been some type of error")
-        errors.append(res)
+        elif res is None:
+            print("None there")
+            errors.append("None")
+        else:
+            print("theres been some type of error")
+            errors.append(res)
 
 
 def check_url_exists(url):
