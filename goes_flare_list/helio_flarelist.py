@@ -36,7 +36,7 @@ get_make_final():
 	full_table = pd.read_csv("helio_flarelist_full.csv")
 	helio_c = full_table[full_table["goes_class_ind"].isin(["X", "M", "C"])]
 	helio_c.reset_index(drop=True, inplace=True)
-	helio_c.to_csv("helio_flarelist_c.csv", index_label=True)
+	helio_c.to_csv("helio_flarelist_c.csv", index_label=False)
 
 get_helio_flarelist()
 get_make_final()
