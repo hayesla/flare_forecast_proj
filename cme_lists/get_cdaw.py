@@ -99,12 +99,58 @@ def get_event_txtfile(cme_event):
 	             + ".p{:03d}g.yht".format(int(cme_event["MPA"]))
 	return final_url
 
-def read_event_txtfile(url):
+def read_event_txtfile_quality(url):
 	opn = urllib.request.urlopen(url)
 	lines = [x.decode() for x in opn.readlines()]
 	for l in lines:
 		if "QUALITY_INDEX" in l:
 			return  " ".join(l.split())
+
+
+def read_event_txtfile_times(url):
+	opn = urllib.request.urlopen(url)
+	lines = [x.decode() for x in opn.readlines()]
+	onset1 = ""
+	onset2 = ""
+	onset2_rsun = ""
+	for l in lines:
+		if "ONSET1" in l:
+			onset1 = " ".join(l.split())
+		if "ONSET2:" in l:
+			onset2 = " ".join(l.split())
+		if "ONSET2_RSUN" in l:
+			onset2_rsun = " ".join(l.split())
+	return onset1, onset2, onset2_rsun
+
+
+def get_onsettimes(save=False):
+	"""
+	Pull the calculated onset times from event txt files. This
+	should be ran in a way with the get_quality functionaility but the
+	way this worked out, I just did it this way.
+	"""
+	import time
+	t1 = time.time()
+	onset_times1, onset_times2, onset2_rsun = [], [], []
+	for i in range(0, len(cdaw_data_final)):
+		print(100*(i/len(cdaw_data_final)))
+		txt_url = get_event_txtfile(cdaw_data_final.iloc[i])
+		try:
+			qual = read_event_txtfile_times(txt_url)
+		except:
+			qual=("", "", "")
+			print("couldn't read url")
+		onset_times1.append(qual[0])
+		onset_times2.append(qual[1])
+		onset2_rsun.append(qual[2])
+	t2 = time.time()
+	print(t2 - t1)
+
+	cdaw_data_final["onset_times1"] = onset_times1	
+	cdaw_data_final["onset_times2"] = onset_times2
+	cdaw_data_final["onset_times2_rsun"] = onset2_rsun
+	if save:	
+		cdaw_data_final.to_csv("cdaw_2010_2018_w_onset_times.csv", index_label=False)
 
 def get_quality(save=False):
 	"""
@@ -119,7 +165,7 @@ def get_quality(save=False):
 		print(100*(i/len(cdaw_data_final)))
 		txt_url = get_event_txtfile(cdaw_data_final.iloc[i])
 		try:
-			qual = read_event_txtfile(txt_url)
+			qual = read_event_txtfile_quality(txt_url)
 		except:
 			qual=""
 			print("couldn't read url")
