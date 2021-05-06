@@ -21,7 +21,6 @@ def fixnoaa_num(x):
 
 latestevents["ar_noaanum"] = latestevents["ar_noaanum"].map(fixnoaa_num)
 
-
 common = pd.merge(flares, latestevents, on="datetime")
 ssw_excess = latestevents[~latestevents["datetime"].isin(common["datetime"])]
 flare_excess = flares[~flares["datetime"].isin(common["datetime"])]
