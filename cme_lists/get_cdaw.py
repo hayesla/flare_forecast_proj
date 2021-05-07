@@ -178,7 +178,15 @@ def get_quality(save=False):
 		cdaw_data_final.to_csv("cdaw_2010_2018_w_quality.csv", index_label=False)
 
 
+def merge_lists()
+	cdaw_qual = pd.read_csv("cdaw_2010_2018_w_quality.csv")
+	cdaw_times = pd.read_csv("cdaw_2010_2018_w_onset_times.csv")
 
+	cdaw_times["quality_index"] = cdaw_qual["quality_index"]
+
+
+	
+	cdaw_times.to_csv("final_cme_list_2010_2018.csv", index_label=False)
 #### tests ##################
 def check_url_exists(url):
 	try:
