@@ -183,9 +183,10 @@ def merge_lists()
 	cdaw_times = pd.read_csv("cdaw_2010_2018_w_onset_times.csv")
 
 	cdaw_times["quality_index"] = cdaw_qual["quality_index"]
+	cdaw_times = cdaw_times.dropna(subset=['quality_index'])
+	cdaw_times["quality_val"] = [int(x.split()[1]) for x in cdaw_times["quality_index"]]
 
 
-	
 	cdaw_times.to_csv("final_cme_list_2010_2018.csv", index_label=False)
 #### tests ##################
 def check_url_exists(url):
