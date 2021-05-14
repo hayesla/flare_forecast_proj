@@ -45,15 +45,18 @@ def make_srs_df(file):
 # 	except:
 # 		errors.append(files[i])
 
-errors= []
-data0 = make_srs_df(files[0])
-for i in range(1, len(files)):
+def get_srs_df():
+	errors= []
+	data0 = make_srs_df(files[0])
+	for i in range(1, len(files)):
 
-	try:
-		data1 = make_srs_df(files[i])
-		if len(data1)>0:
-			data0 = vstack([data0, data1])
-	except:
-		print(i)
-		errors.append(i)
+		try:
+			data1 = make_srs_df(files[i])
+			if len(data1)>0:
+				data0 = vstack([data0, data1])
+		except:
+			print(i)
+			errors.append(i)
 
+	srs_df = data0.to_pandas()
+	srs_df.to_csv("SRS_all_2010-2018.csv", index_label=False)
