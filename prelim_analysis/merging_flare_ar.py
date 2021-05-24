@@ -26,7 +26,7 @@ flare_list["noaa_ar"] = flare_list["noaa_ar"].replace(["\n","", "     "], 0)
 flare_list["noaa_ar"] = flare_list["noaa_ar"].astype(int)
 
 flare_list["matchtime"] = flare_list["event_starttime"].dt.strftime("%Y-%m-%d 00:30")
-flare_list = flare_list[flare_list["noaa_ar"]!=0]
+#flare_list = flare_list[flare_list["noaa_ar"]!=0]
 
 
 ar_data = pd.read_csv("/Users/laurahayes/ml_project_flares/flare_analysis/AR_analysis/SRS_all_2010-2018.csv")
@@ -53,4 +53,11 @@ for ar in unique_ar:
 
 events = pd.DataFrame(events)
 
-events.max_area = events.max_area+1
+events = events[events.max_area>0]
+
+order = ['Alpha', 'Beta', 'Beta-Gamma',  'Beta-Delta',  'Beta-Gamma-Delta']
+sns.scatterplot(data=events, x="max_area", y="max_flare", hue="ar_class_max", palette="magma", hue_order=order[::-1])
+plt.xscale("log")
+plt.yscale("log")
+
+
