@@ -141,5 +141,5 @@ and define the name you want for your output csv
 tstart, tend = "2010-01-01", "2018-12-31"
 savedir ='/Users/laurahayes/ml_project_flares/flare_analysis/AR_analysis/srs_data/'
 csv_filename = 'SRS_all_2010-2018.csv'
-
+get_srs_files(tstart, tend, savedir)
 get_all_ar_info(tstart, tend, savedir, csv_filename)
