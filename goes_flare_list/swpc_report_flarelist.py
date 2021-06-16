@@ -9,6 +9,15 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd 
 import datetime
 
+"""
+This is the script that allows you to get the GOES flare list from the SWPC daily
+event reports. The `get_yearly_tar_files` searches and downloads the files between
+a given timerange, and then `get_swpc_flarelist` then reads in the files and then can
+create a pandas dataframe of the flarelist between given dates and saves the results as a 
+csv file.
+
+This is used to create swpc_event_list.csv.
+"""
 
 def get_yearly_tar_files(tstart, tend, savedir='./goes_files'):
 	"""
@@ -79,6 +88,6 @@ flarelist.
 --------------------------------------------------------
 """
 
-# tstart, tend = "2010-01-01", "2018-01-01"
-# get_yearly_tar_files(tstart, tend)
-# get_swpc_flarelist(tstart, tend)
+tstart, tend = "2010-01-01", "2018-01-01"
+get_yearly_tar_files(tstart, tend)
+get_swpc_flarelist(tstart, tend)
