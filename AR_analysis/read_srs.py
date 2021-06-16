@@ -12,6 +12,10 @@ from astropy.table import Column, MaskedColumn, QTable, vstack
 
 __all__ = ['read_srs']
 
+"""
+Note - L.A.Hayes - this functionality is taken from sunpy with a slight change taken from sunpy.io.special!
+See - https://github.com/sunpy/sunpy/blob/main/sunpy/io/special/srs.py
+"""
 
 def read_srs(filepath):
     """

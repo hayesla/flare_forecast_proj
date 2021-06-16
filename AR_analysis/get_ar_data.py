@@ -6,30 +6,57 @@ from sunpy.time import TimeRange
 import  read_srs as srs
 from dateutil.relativedelta import relativedelta
 from astropy.table import Column, vstack
+import urllib
+import tarfile
+import os
 
-def get_srs_files():
-	trange = TimeRange("2010-01-01", "2018-12-31")
+
+def get_srs_files(tstart, tend, savedir='./'):
+	"""
+	Function to download the NOAA solar region summary files SRS files
+	given a timerange. The text files will be downloaded to a local directory
+	specified in the savedir keyword.
+	
+	Parameters
+	----------
+	tstart : ~str
+		start date of search to download
+	tend : ~str
+		end date of search to download
+	savedir : ~str, optional
+		path to where to save the files. Default is cwd.
+
+	"""
+
+	trange = TimeRange(tstart, tend)
 	file_pattern_swpc = ("ftp://ftp.swpc.noaa.gov/pub/warehouse/%Y/%Y_SRS.tar.gz")
 	file_scraper_swpc = scraper.Scraper(file_pattern_swpc)
 
 	urls = file_scraper_swpc.filelist(trange)
 	for u in urls:
-		urllib.request.urlretrieve(u, '/Users/laurahayes/ml_project_flares/flare_analysis/AR_analysis/srs_data/'+u.split("/")[-1])
+		filename = savedir+u.split("/")[-1]
+		if os.path.exists(filename):
+			return
+		urllib.request.urlretrieve(u, filename)
+		if os.path.exists(filename):
+			with tarfile.open(filename, 'r') as t:
+				t.extractall(path=savedir)
 
 
+def make_srs_table(file):
+	"""
+	Function to read a SRS text file and return an astropy Table with the read in data.
 
-filedir = "/Users/laurahayes/ml_project_flares/flare_analysis/AR_analysis/srs_data/%Y_SRS/%Y%m%dSRS.txt"
-timerange = TimeRange("2010-01-01", "2018-12-31")
-t0 = timerange.start.datetime
-files = [t0.strftime(filedir)]
-while timerange.end.datetime>t0:
-	t0 = t0 + relativedelta(days=1)
-	files.append(t0.strftime(filedir))
+	Parameters
+	----------
+	file : ~str
+		SRS txt file to be read in
 
-files.sort()
+	Returns
+	-------
+	astropy.table.Table
 
-
-def make_srs_df(file):
+	"""
 
 	file_table = srs.read_srs(file)
 	date_obs = file_table.meta["issued"]
@@ -38,20 +65,24 @@ def make_srs_df(file):
 
 	return file_table
 
-# errors = []
-# for i in range(len(files)):
-# 	try:
-# 		_ = make_srs_df(files[i])
-# 	except:
-# 		errors.append(files[i])
+def get_srs_df(files, save=False, csv_filename="SRS_all.csv"):
+	"""
+	Function to read a list of SRS files and then return a pandas DataFrame 
+	of the concatenated information from the files.
 
-def get_srs_df():
+	Parameters
+	----------
+	files : ~list
+		list of SRS files
+	save : Boolean, optional
+		if True, it will save the pd.DataFrame as a csv file
+	"""
 	errors= []
-	data0 = make_srs_df(files[0])
+	data0 = make_srs_table(files[0])
 	for i in range(1, len(files)):
 
 		try:
-			data1 = make_srs_df(files[i])
+			data1 = make_srs_table(files[i])
 			if len(data1)>0:
 				data0 = vstack([data0, data1])
 		except:
@@ -59,4 +90,56 @@ def get_srs_df():
 			errors.append(i)
 
 	srs_df = data0.to_pandas()
-	srs_df.to_csv("SRS_all_2010-2018.csv", index_label=False)
+	if save:
+		srs_df.to_csv(csv_filename, index_label=False)
+	else:
+		return srs_df 
+
+def get_all_ar_info(tstart, tend, savedir, csv_filename):
+	"""
+	Function that takes a start and end time, download the SRS files
+	between those times, and then saves all in the information in one csv
+	file, which can then be read into a pandas dataframe.
+
+	Parameters
+	----------
+	tstart : ~str
+		start date of search to download
+	tend : ~str
+		end date of search to download
+	savedir : ~str, optional
+		path to where to save the files. Default is cwd.
+	csv_filename : ~str
+		name of csv file to which to save final pd.DataFrame
+
+	"""
+	# download SRS files
+	get_srs_files(tstart, tend, savedir=savedir)
+
+	# get list of all the files
+	filedir = "{:s}%Y_SRS/%Y%m%dSRS.txt".format(savedir)
+	timerange = TimeRange(tstart, tend)
+	t0 = timerange.start.datetime
+	files = [t0.strftime(filedir)]
+	while timerange.end.datetime>t0:
+		t0 = t0 + relativedelta(days=1)
+		files.append(t0.strftime(filedir))
+	files.sort()
+
+	# read in all individal files and save to csv file.
+	get_srs_df(files, save=True, csv_filename=csv_filename)
+
+
+"""
+--------------------------------------------------------
+This is where you would add in your own timerange dates, 
+your own local directory to save the SRS txt files
+and define the name you want for your output csv
+--------------------------------------------------------
+"""
+
+tstart, tend = "2010-01-01", "2018-12-31"
+savedir ='/Users/laurahayes/ml_project_flares/flare_analysis/AR_analysis/srs_data/'
+csv_filename = 'SRS_all_2010-2018.csv'
+
+get_all_ar_info(tstart, tend, savedir, csv_filename)
