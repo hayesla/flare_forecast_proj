@@ -2,6 +2,15 @@ import pandas as pd
 import matplotlib.pyplot as plt 
 import numpy as np 
 
+"""
+This script takes a GOES flare list that has been created using `swpc_report_flarelist.py` and an AR list
+created using `get_ar_data.py` and merges them to create a flare list that then includes AR data associated with each flare.
+You can also merge it the other way if you like to create an AR database (for each day) with associated flares. 
+
+It outputs a csv file of the merged flare and AR propery list.
+"""
+
+
 ## read in flarelist
 flare_list = pd.read_csv("/Users/laurahayes/ml_project_flares/flare_analysis/goes_flare_list/swpc_event_list.csv")
 # create a column "matchtime" which will be used to merge with the AR data
