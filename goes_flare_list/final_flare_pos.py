@@ -6,7 +6,6 @@ from sunpy.coordinates import frames
 from astropy.coordinates import SkyCoord
 from astropy import units as u 
 
-
 """
 This is the script that creates the final flare list used in this work. 
 It uses the SWPC flare list created in `swpc_report_flarelist.py` and then merges
