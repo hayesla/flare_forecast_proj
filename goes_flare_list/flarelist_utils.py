@@ -4,7 +4,7 @@ import urllib
 import pandas as pd
 import os 
 
-def get_swpc_reports(trange, savedir=None):
+def get_swpc_reports(timerange, savedir=None):
     """
     Function to search for an download the SWPC event reports.
     The reports are available from 2015-06-29 to present.
@@ -31,7 +31,7 @@ def get_swpc_reports(trange, savedir=None):
     file_pattern_swpc = ("ftp://ftp.swpc.noaa.gov/pub/indices/events/%Y%m%devents.txt")
     file_scraper_swpc = scraper.Scraper(file_pattern_swpc)
 
-    urls = file_scraper_swpc.filelist(trange)
+    urls = file_scraper_swpc.filelist(timerange)
     urls.sort()
     return download_urls(urls, savedir)
 

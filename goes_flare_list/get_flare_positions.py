@@ -52,7 +52,23 @@ urls = flares["datetime"].dt.strftime(urlbase)
 
 def get_df(url, retry_count=1):
     """
-    urls
+    Function to get the data from the LMSAL latest event archive based on the passed url. 
+    It reads the table present on the url page and return a dataframe of the information available 
+    on it. 
+
+    Parameters
+    ----------
+    url : `~str` 
+        the url of the LMSAL latest events for the date of interest
+
+    retry_count : `~int`
+        how many retrys should happen if there is a reconnection error when pinging url
+
+    Returns
+    -------
+    ~pd.DataFrame
+        if the table exists on page, it will return a dataframe of the info.
+        
     """
     try: 
         test = requests.get(url)
@@ -72,6 +88,7 @@ def get_df(url, retry_count=1):
         time.sleep(5)
         print("trying again")
         get_df(url, retry_count + 1)
+    
     except:
         print("random error!")
         return url

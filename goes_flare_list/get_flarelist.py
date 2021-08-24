@@ -79,7 +79,7 @@ def merge_swpc(tstart, tend):
 	return df_flares[final_columns]
 
 
-df_ngdc = merge_ngdc("2010-01-01", "2016-12-31")
+# df_ngdc = merge_ngdc("2010-01-01", "2016-12-31")
 df_swpc = merge_swpc("2017-01-01", "2018-12-31")
 
 flare_list = df_ngdc.append(df_swpc)

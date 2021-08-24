@@ -88,6 +88,6 @@ flarelist.
 --------------------------------------------------------
 """
 
-tstart, tend = "2010-01-01", "2018-01-01"
-get_yearly_tar_files(tstart, tend)
-get_swpc_flarelist(tstart, tend)
+# tstart, tend = "2010-01-01", "2018-01-01"
+# get_yearly_tar_files(tstart, tend)
+# get_swpc_flarelist(tstart, tend)
