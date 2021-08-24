@@ -3,8 +3,16 @@ from sunpy.time import TimeRange
 import urllib
 import pandas as pd
 import os 
+import glob
+import tarfile
 
-def get_swpc_reports(timerange, savedir=None):
+"""
+This is a script that holds a number of utility functions to search for and 
+download GOES event list files. It also holds functions to read the different 
+GOES event files. 
+"""
+
+def get_daily_swpc_reports(timerange, savedir=None):
     """
     Function to search for an download the SWPC event reports.
     The reports are available from 2015-06-29 to present.
@@ -36,7 +44,7 @@ def get_swpc_reports(timerange, savedir=None):
     return download_urls(urls, savedir)
 
 
-def get_yearly_event_report_tar_files(tstart, tend, savedir='./goes_files/'):
+def get_yearly_swpc_event_reports(tstart, tend, savedir='./goes_files/'):
     """
     Function to download yearly tar files that contain all the daily swpc reports and
     save them to the `./goes_files` dir (by default). Data available from 1996-present.
@@ -63,16 +71,13 @@ def get_yearly_event_report_tar_files(tstart, tend, savedir='./goes_files/'):
         dir_name = u.split("/")[-1]
         if not os.path.exists(savedir + dir_name.split(".")[0]):
             urllib.request.urlretrieve(u, dir_name)
-
-    tar_files = glob.glob("*event*.tar.gz")
-    for f in tar_files:
-        my_tar = tarfile.open(f)
-        my_tar.extractall(savedir) # specify which folder to extract to
-        my_tar.close()
-
+            # extract tar to savedir directory
+            my_tar = tarfile.open(dir_name)
+            my_tar.extractall(savedir) # specify which folder to extract to
+            my_tar.close()
 
     
-def get_ngdc_reports(timerange, savedir=None):
+def get_yearly_ngdc_reports(timerange, savedir=None):
     """
     Function to search and download the NOAA NDGC reports.
     The reports are available from 1975 - 2017-06-28.
