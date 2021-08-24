@@ -35,6 +35,42 @@ def get_swpc_reports(timerange, savedir=None):
     urls.sort()
     return download_urls(urls, savedir)
 
+
+def get_yearly_event_report_tar_files(tstart, tend, savedir='./goes_files/'):
+    """
+    Function to download yearly tar files that contain all the daily swpc reports and
+    save them to the `./goes_files` dir (by default). Data available from 1996-present.
+
+    Parameters
+    ----------
+    tstart : ~str
+        start date of search to download
+    tend : ~str
+        end date of search to download
+    savedir : ~str, optional
+        path to where to save the files. Default is ./goes_files.
+
+    """
+    file_url = "ftp://ftp.swpc.noaa.gov/pub//warehouse/%Y/%Y_events.tar.gz"
+    
+    goes_scraper = scraper.Scraper(file_url)
+
+    urls = goes_scraper.filelist(TimeRange(tstart, tend))
+
+    for u in urls:
+        # check is data directory already exists locally
+        # and if not download
+        dir_name = u.split("/")[-1]
+        if not os.path.exists(savedir + dir_name.split(".")[0]):
+            urllib.request.urlretrieve(u, dir_name)
+
+    tar_files = glob.glob("*event*.tar.gz")
+    for f in tar_files:
+        my_tar = tarfile.open(f)
+        my_tar.extractall(savedir) # specify which folder to extract to
+        my_tar.close()
+
+
     
 def get_ngdc_reports(timerange, savedir=None):
     """
