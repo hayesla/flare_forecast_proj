@@ -210,6 +210,9 @@ def read_swpc_reports(file):
         for line in f.readlines():
             if "Date:" in line:
                 date = line[7:17].replace(" ", "")
+            elif "EDITED EVENTS for" in line:
+                date = pd.to_datetime(line[18:29]).strftime("%Y%m%d")
+
             if "XRA" in line:
                 event_list = {}
                 event_list["date"] = date
@@ -222,7 +225,15 @@ def read_swpc_reports(file):
                 event_list["goes_class_ind"] = line[58]
                 event_list["goes_class"] = line[58:62]
                 event_list["integrated_flux"] = line[66:73]
-                event_list["noaa_ar"] = "1"+line[76:80] if (line[76:80]!= "    ") else line[75:80]
+                # to adjust for cases when no active region number
+                # and when the NOAA ar numbering passed 9000.
+                if len(line)>75:
+                    ar = int(line[76:80]) if (line[76:80]!= "    " and '\n' not in line[76:80]) else 0
+                    if (ar < 4000 and ar!=0):
+                        ar = ar + 10000
+                else:
+                    ar = 0
+                event_list["noaa_ar"] = ar
                 flare_list.append(event_list)
 
     return pd.DataFrame(flare_list)
