@@ -11,6 +11,7 @@ import tarfile
 import os
 
 
+get_all_ar_info(tstart, tend, savedir)
 def get_srs_files(tstart, tend, savedir='./'):
 	"""
 	Function to download the NOAA solar region summary files SRS files
@@ -95,7 +96,7 @@ def get_srs_df(files, save=False, csv_filename="SRS_all.csv"):
 	else:
 		return srs_df 
 
-def get_all_ar_info(tstart, tend, savedir, csv_filename):
+def get_all_ar_info(tstart, tend, savedir, csv_filename=None):
 	"""
 	Function that takes a start and end time, download the SRS files
 	between those times, and then saves all in the information in one csv
@@ -114,7 +115,7 @@ def get_all_ar_info(tstart, tend, savedir, csv_filename):
 
 	"""
 	# download SRS files
-	get_srs_files(tstart, tend, savedir=savedir)
+	#get_srs_files(tstart, tend, savedir=savedir)
 
 	# get list of all the files
 	filedir = "{:s}%Y_SRS/%Y%m%dSRS.txt".format(savedir)
@@ -125,6 +126,16 @@ def get_all_ar_info(tstart, tend, savedir, csv_filename):
 		t0 = t0 + relativedelta(days=1)
 		files.append(t0.strftime(filedir))
 	files.sort()
+	
+	
+	files.sort()
+	for f in files:
+		if not os.path.exists(f):
+			print("No data found {:s}".format(f))
+			files.remove(f)
+
+	if csv_filename is None:
+		csv_filename = "SRS_data_{:s}_{:s}.csv".format(timerange.start.strftime("%Y%m%d"), timerange.end.strftime("%Y%m%d"))
 
 	# read in all individal files and save to csv file.
 	get_srs_df(files, save=True, csv_filename=csv_filename)
@@ -138,8 +149,15 @@ and define the name you want for your output csv
 --------------------------------------------------------
 """
 
-tstart, tend = "2010-01-01", "2018-12-31"
-savedir ='/Users/laurahayes/ml_project_flares/flare_analysis/AR_analysis/srs_data/'
-csv_filename = 'SRS_all_2010-2018.csv'
-get_srs_files(tstart, tend, savedir)
-get_all_ar_info(tstart, tend, savedir, csv_filename)
+# savedir ='/Users/laurahayes/ml_project_flares/flare_analysis/AR_analysis/srs_data/'
+
+# tstart, tend = "2010-01-01", "2018-12-31"
+
+# csv_filename = 'SRS_all_2010-2018.csv'
+# get_srs_files(tstart, tend, savedir)
+# get_all_ar_info(tstart, tend, savedir, csv_filename=csv_filename)
+
+
+
+# tstart = "1996-01-01"
+# tend = "2018-12-31"
