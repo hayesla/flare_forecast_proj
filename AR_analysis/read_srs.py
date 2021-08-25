@@ -33,6 +33,15 @@ def read_srs(filepath):
     with open(filepath) as srs:
         file_lines = srs.readlines()
 
+    file_lines = [f.upper() for f in file_lines]
+
+    # this is for before 2000-10-02 when text files changed
+    for i in range(len(file_lines)):
+        if "MAG TYPE" in file_lines[i]:
+            file_lines[i] = file_lines[i].replace("MAG TYPE", "MAGTYPE")
+        elif "COMMENT\n" in file_lines[i]:
+            file_lines[i] = file_lines[i].replace("COMMENT\n", "\n")
+
     header, section_lines = split_lines(file_lines)
 
     return make_table(header, section_lines)
@@ -47,6 +56,7 @@ def make_table(header, section_lines):
 
     tables = []
     for i, lines in enumerate(section_lines):
+        print(i)
         if lines:
             key = list(meta_data['id'].keys())[i]
             t1 = astropy.io.ascii.read(lines)
@@ -54,15 +64,15 @@ def make_table(header, section_lines):
             if len(t1) == 0:
                 col_data_types = {
                     # ID : <class 'str'>
-                    'Nmbr': np.dtype('i4'),
-                    'Location': np.dtype('U6'),
-                    'Lo': np.dtype('i8'),
-                    'Area': np.dtype('i8'),
+                    'NMBR': np.dtype('i4'),
+                    'LOCATION': np.dtype('U6'),
+                    'LO': np.dtype('i8'),
+                    'AREA': np.dtype('i8'),
                     'Z': np.dtype('U3'),
                     'LL': np.dtype('i8'),
                     'NN': np.dtype('i8'),
-                    'MagType': np.dtype('S4'),
-                    'Lat': np.dtype('i8')
+                    'MAGTYPE': np.dtype('S4'),
+                    'LAT': np.dtype('i8')
                 }
                 for c in t1.itercols():
                     # Put data types of columns in empty table to correct types,
@@ -78,22 +88,22 @@ def make_table(header, section_lines):
     out_table = vstack(tables)
 
     # Parse the Location column in Table 1
-    if 'Location' in out_table.columns:
-        col_lat, col_lon = parse_location(out_table['Location'])
-        del out_table['Location']
+    if 'LOCATION' in out_table.columns:
+        col_lat, col_lon = parse_location(out_table['LOCATION'])
+        del out_table['LOCATION']
         out_table.add_column(col_lat)
         out_table.add_column(col_lon)
 
     # Parse the Lat column in Table 3
-    if 'Lat' in out_table.columns:
-        parse_lat_col(out_table['Lat'], out_table['Latitude'])
-        del out_table['Lat']
+    if 'LAT' in out_table.columns:
+        parse_lat_col(out_table['LAT'], out_table['Latitude'])
+        del out_table['LAT']
 
     # Give columns more sensible names
-    out_table.rename_column("Nmbr", "Number")
+    out_table.rename_column("NMBR", "Number")
     out_table.rename_column("NN", "Number of Sunspots")
-    out_table.rename_column("Lo", "Carrington Longitude")
-    out_table.rename_column("MagType", "Mag Type")
+    out_table.rename_column("LO", "Carrington Longitude")
+    out_table.rename_column("MAGTYPE", "Mag Type")
     out_table.rename_column("LL", "Longitudinal Extent")
 
     # Define a Solar Hemispere Unit
@@ -107,7 +117,7 @@ def make_table(header, section_lines):
 
     # Set units on the table
     out_table['Carrington Longitude'].unit = u.deg
-    out_table['Area'].unit = a['uSH']
+    out_table['AREA'].unit = a['uSH']
     out_table['Longitudinal Extent'].unit = u.deg
 
     out_table.meta = meta_data
@@ -138,13 +148,13 @@ def split_lines(file_lines):
         file_lines[l] = '# ' + file_lines[l]
     t1_lines = file_lines[section_lines[0]:section_lines[1]]
     # Remove the space so table reads it correctly
-    t1_lines[1] = t1_lines[1].replace('Mag Type', 'MagType')
+    t1_lines[1] = t1_lines[1].replace('MAG TYPE', 'MAGTYPE')
     t2_lines = file_lines[section_lines[1]:section_lines[2]]
     t3_lines = file_lines[section_lines[2]:]
 
     lines = [t1_lines, t2_lines, t3_lines]
     for i, ll in enumerate(lines):
-        if ll[2].strip() == 'None':
+        if ll[2].strip() == 'NONE':
             del ll[2]
 
     return header, lines
