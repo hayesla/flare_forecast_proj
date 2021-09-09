@@ -36,11 +36,11 @@ def read_srs(filepath):
     file_lines = [f.upper() for f in file_lines]
 
     # this is for before 2000-10-02 when text files changed
-    for i in range(len(file_lines)):
-        if "MAG TYPE" in file_lines[i]:
-            file_lines[i] = file_lines[i].replace("MAG TYPE", "MAGTYPE")
-        elif "COMMENT\n" in file_lines[i]:
-            file_lines[i] = file_lines[i].replace("COMMENT\n", "\n")
+    # for i in range(len(file_lines)):
+    #     if "MAG TYPE" in file_lines[i]:
+    #         file_lines[i] = file_lines[i].replace("MAG TYPE", "MAGTYPE")
+    #     elif "COMMENT\n" in file_lines[i]:
+    #         file_lines[i] = file_lines[i].replace("COMMENT\n", "\n")
 
     header, section_lines = split_lines(file_lines)
 
@@ -56,7 +56,7 @@ def make_table(header, section_lines):
 
     tables = []
     for i, lines in enumerate(section_lines):
-        print(i)
+        # print(i)
         if lines:
             key = list(meta_data['id'].keys())[i]
             t1 = astropy.io.ascii.read(lines)
@@ -136,12 +136,27 @@ def split_lines(file_lines):
     is not 'None'.
     """
     section_lines = []
+    comment_indices = []
     for i, line in enumerate(file_lines):
         if line.startswith(("I.", "IA.", "II.")):
             section_lines.append(i)
+        elif line.startswith(("III", "III.", "EFFECTIVE", "COMMENTS", "COMMENT", "99999", "PLAIN", "THIS")):
+            comment_indices.append(i)
+
 
     header = file_lines[:section_lines[0]]
     header += [file_lines[s] for s in section_lines]
+
+
+    if len(comment_indices)>0:
+        file_lines = file_lines[:comment_indices[0]]
+
+    for i in range(len(file_lines)):
+        if "MAG TYPE" in file_lines[i]:
+            file_lines[i] = file_lines[i].replace("MAG TYPE", "MAGTYPE")
+        elif "COMMENT\n" in file_lines[i]:
+            file_lines[i] = file_lines[i].replace("COMMENT\n", "\n")
+
 
     # Append comments to the comment lines
     for l in section_lines:
@@ -152,13 +167,24 @@ def split_lines(file_lines):
     t2_lines = file_lines[section_lines[1]:section_lines[2]]
     t3_lines = file_lines[section_lines[2]:]
 
+
+    t1_lines = remove_bad_rows(t1_lines)
+    t2_lines = remove_bad_rows(t2_lines)
+    t3_lines = remove_bad_rows(t3_lines)  
+
     lines = [t1_lines, t2_lines, t3_lines]
-    for i, ll in enumerate(lines):
-        if ll[2].strip() == 'NONE':
-            del ll[2]
+    # for i, ll in enumerate(lines):
+    #     if ll[2].strip() == 'NONE':
+    #         del ll[2]
 
     return header, lines
 
+def remove_bad_rows(listy):
+    listy2 = listy.copy()
+    for i in range(1, len(listy)):
+        if len(listy[i].split())!=len(listy[1].split()):
+            listy2.remove(listy[i])
+    return listy2
 
 def get_meta_data(header):
     """

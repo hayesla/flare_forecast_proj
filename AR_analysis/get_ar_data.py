@@ -11,7 +11,7 @@ import tarfile
 import os
 
 
-get_all_ar_info(tstart, tend, savedir)
+
 def get_srs_files(tstart, tend, savedir='./'):
 	"""
 	Function to download the NOAA solar region summary files SRS files
@@ -88,13 +88,14 @@ def get_srs_df(files, save=False, csv_filename="SRS_all.csv"):
 				data0 = vstack([data0, data1])
 		except:
 			print(i)
-			errors.append(i)
+			errors.append(files[i])
 
 	srs_df = data0.to_pandas()
 	if save:
 		srs_df.to_csv(csv_filename, index_label=False)
+		return errors
 	else:
-		return srs_df 
+		return srs_df, errors
 
 def get_all_ar_info(tstart, tend, savedir, csv_filename=None):
 	"""
@@ -138,8 +139,8 @@ def get_all_ar_info(tstart, tend, savedir, csv_filename=None):
 		csv_filename = "SRS_data_{:s}_{:s}.csv".format(timerange.start.strftime("%Y%m%d"), timerange.end.strftime("%Y%m%d"))
 
 	# read in all individal files and save to csv file.
-	get_srs_df(files, save=True, csv_filename=csv_filename)
-
+	errors = get_srs_df(files, save=True, csv_filename=csv_filename)
+	return errors
 
 """
 --------------------------------------------------------
@@ -149,7 +150,7 @@ and define the name you want for your output csv
 --------------------------------------------------------
 """
 
-# savedir ='/Users/laurahayes/ml_project_flares/flare_analysis/AR_analysis/srs_data/'
+savedir ='/Users/laurahayes/ml_project_flares/flare_analysis/AR_analysis/srs_data/'
 
 # tstart, tend = "2010-01-01", "2018-12-31"
 
@@ -159,5 +160,8 @@ and define the name you want for your output csv
 
 
 
-# tstart = "1996-01-01"
-# tend = "2018-12-31"
+tstart = "1996-01-01"
+tend = "2018-12-31"
+
+
+errors = get_all_ar_info(tstart, tend, savedir)

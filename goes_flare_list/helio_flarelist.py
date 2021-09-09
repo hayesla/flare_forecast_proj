@@ -22,6 +22,8 @@ def get_goes_class(x):
     else:
         return
 
+
+# http://hec.helio-vo.eu/hec/hec_gui.php
 def get_helio_flarelist():
     aa = parse("http://hec.helio-vo.eu/hec/hec_gui_fetch.php?interfacetype=vmstilts&sql=select+%2A+from+gevloc_sxr_flare+where+time_start%3E%3D%272010-01-01+00%3A00%3A00%27+AND+time_start%3C%3D%272018-12-31+23%3A59%3A59%27&type=votable")
     full_table = aa.get_first_table().to_table().to_pandas()

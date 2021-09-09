@@ -51,6 +51,12 @@ def get_swpc_flarelist(tstart, tend, csv_filename=None):
 	df_flares_c.reset_index(inplace=True, drop=True)
 	if csv_filename is None:
 		csv_filename = "swpc_flarelist_{:s}_{:s}.csv".format(timerange.start.strftime("%Y%m%d"), timerange.end.strftime("%Y%m%d"))
+
+
+	df_flares_c["start_time"] = pd.to_datetime(df_flares_c["date"] + df_flares_c["start_time"], format="%Y%m%d%H%M")
+	df_flares_c["end_time"] = pd.to_datetime(df_flares_c["date"] + df_flares_c["end_time"], format="%Y%m%d%H%M")
+
+
 	df_flares_c.to_csv(csv_filename, index_label=False)
 
 get_swpc_flarelist(tstart, tend)
