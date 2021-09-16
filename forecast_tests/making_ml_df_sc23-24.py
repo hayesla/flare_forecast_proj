@@ -59,7 +59,7 @@ ar_data["noaa_ar"] = ar_data["ar_noaanum"].astype(str)
 ar_data.drop(columns=["NM", "NONE", "BETA"], inplace=True)
 ar_data.rename(columns={"date": "AR issue_date"}, inplace=True)
 # adjust to match the timerange of the start of solar cycle 23 (this is what the flare list timerange is)
-ar = ar_data[ar_data["matchtime"]>="1996-08-01"]
+ar_data = ar_data[ar_data["matchtime"]>="1996-08-01"]
 ar_data.reset_index(inplace=True, drop=True)
 
 
