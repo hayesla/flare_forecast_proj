@@ -1,15 +1,18 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
-
 from sklearn import metrics
 from sklearn.calibration import calibration_curve
 
+
+"""
+This script holds some useful functions for calculating forcast verification metrics.
+"""
 
 ############## SKILL SCORES #################
 
 def calculate_tss(true_vals, pred_vals):
     """
-    Get the True Skill Score (TSS) to test the overall predictive 
+    Calculate the True Skill Score (TSS) to test the overall predictive 
     abilities of a given forecast.
 
     Parameters
@@ -37,9 +40,8 @@ def calculate_tss(true_vals, pred_vals):
 
 def calculate_tss_threshold(true_vals, prob_vals, thresh):
     """
-    This will get the TSS for a given threshold. This should be 
-    used when the forecast gives a probability
-
+    Calculate the TSS for a given threshold. This should be 
+    used when the forecast gives a probability.
 
     Parameters
     ---------
@@ -59,7 +61,7 @@ def calculate_tss_threshold(true_vals, prob_vals, thresh):
 
 def calculate_bss(true_vals, prob_vals):
     """
-    Get the Brier Skill Score (BSS) of a predictive model.
+    Calculate the Brier Skill Score (BSS) of a predictive model.
 
     Parameters
     ----------
