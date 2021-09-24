@@ -26,6 +26,18 @@ data_ar_evol = pd.read_csv("AR_flare_ml_23_24_evol.csv")
 # replace nans with 0's with pre-flare feature
 data_ar_evol["pre_flare"].replace(np.nan, 0, inplace=True)
 
+# replicate rows for rows that have flares C+ > 1
+new_rows = []
+for i in range(len(data_ar_evol)):
+    df = data_ar_evol.iloc[i]
+    no_flares = df["C+"].astype(int)
+    if no_flares > 1:
+        nr = [df]*(no_flares-1)
+        for n in nr:
+            new_rows.append(n)
+
+data_ar_evol = data_ar_evol.append(new_rows, ignore_index=True)
+
 data_ar_evol["C+"] = data_ar_evol["C+"].map(lambda x: 1 if x>0 else 0)
 data_ar_evol.drop(columns=["M+", "X+"], inplace=True)
 
