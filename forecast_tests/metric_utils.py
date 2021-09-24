@@ -2,7 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from sklearn import metrics
 from sklearn.calibration import calibration_curve
-
+import seaborn as sns
+# plotting setups
+plt.rcParams['xtick.direction'] = "in"
+plt.rcParams['ytick.direction'] = "in"
+plt.rcParams['xtick.minor.visible'] = True
+plt.rcParams['ytick.minor.visible'] = True
+plt.rcParams['font.family'] = 'Helvetica'
+sns.set_context("paper", font_scale=1.2)
 
 """
 This script holds some useful functions for calculating forcast verification metrics.
@@ -98,6 +105,8 @@ def plot_roc_curve(true_vals, prob_vals, ax=None):
         The predicted probability values of the model.
     ax : `~matplotlib.axes.Axes`, optional
         If provided the image will be plotted on the given axes.
+    savename : `~str`, path to save file, optional
+        if passed, the plot will be saved to given path `savename`.
     
     Returns
     -------
@@ -118,9 +127,9 @@ def plot_roc_curve(true_vals, prob_vals, ax=None):
     ax.set_ylabel("True Positive Rate")
     ax.legend(loc="lower right")
     ax.set_title("ROC Curve")
-    plt.show()
+    plt.tight_layout()
 
-
+    return ax       
 
 def plot_reliability_curve(true_vals, pred_vals, n_bins=10):
     """
@@ -134,7 +143,8 @@ def plot_reliability_curve(true_vals, pred_vals, n_bins=10):
         The predicted Y values from the model.
     n_bins : `int`, optional, default 10.
         Number of bins to discretize the [0, 1] interval (input to sklearn `calibration_curve` function).
-    
+    savename : `~str`, path to save file, optional
+        if passed, the plot will be saved to given path `savename`.   
     Returns
     -------
     Plots the reliability diagram
@@ -168,7 +178,7 @@ def plot_reliability_curve(true_vals, pred_vals, n_bins=10):
 
     plt.tight_layout()
     plt.subplots_adjust(hspace=0.05)
-    plt.show()
+    return (ax1, ax2)
 
 
 def plot_feature_importance(mdl, features, top=None, title="Feature importance"):

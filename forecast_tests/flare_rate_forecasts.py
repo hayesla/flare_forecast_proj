@@ -96,7 +96,7 @@ def forecast_mcstat(flare_rates, mcint, evol=False):
     else:
     	flare_rate_mcint = flare_rates[flare_rates["McIntosh"].isin([mcint])]
     if len(flare_rate_mcint)==0:
-        return 0, 0, 0
+        return np.nan, np.nan, np.nan # TODO note this is going to effect ROC curve - maybe drop these for metrics 
     c_prob = 1-np.exp(-flare_rate_mcint["C_rate"].values[0])
     m_prob = 1-np.exp(-flare_rate_mcint["M_rate"].values[0])
     x_prob = 1-np.exp(-flare_rate_mcint["X_rate"].values[0])
@@ -152,8 +152,8 @@ plt.savefig("./flare_rate_plots/reliability_mcstat.png", dpi=300, bbox_inches="t
 #--------------------------------------------------------------------------------------#
 ############## MCEVOL ##################
 
-train_ar_evol = data_ar_evol[~(data_ar_evol["AR issue_date"]>="2016-01-01")&(data_ar["AR issue_date"]<="2017-12-31")]
-test_ar_evol = data_ar_evol[(data_ar_evol["AR issue_date"]>="2016-01-01")&(data_ar["AR issue_date"]<="2017-12-31")]
+train_ar_evol = data_ar_evol[~(data_ar_evol["AR issue_date"]>="2016-01-01")&(data_ar_evol["AR issue_date"]<="2017-12-31")]
+test_ar_evol = data_ar_evol[(data_ar_evol["AR issue_date"]>="2016-01-01")&(data_ar_evol["AR issue_date"]<="2017-12-31")]
 
 flare_rates_train_evol = get_flare_rates_mcevol(train_ar_evol)
 
@@ -161,6 +161,12 @@ X_test_evol = test_ar_evol["evolution_mcint"].values
 y_test_c_evol = test_ar_evol["C+"].map(lambda x: 1 if x>0 else 0).values
 
 y_pred_c_evol = [forecast_mcstat(flare_rates_train_evol, x, evol=True)[0] for x in X_test_evol]
+
+
+inds_nans = np.where(np.isnan(y_pred_c_evol))[0]
+y_pred_c_evol = np.delete(y_pred_c_evol, inds_nans)
+y_test_c_evol = np.delete(y_test_c_evol, inds_nans)
+
 
 # Brier Skill Score
 bss_mcevol = calculate_bss(y_test_c_evol, y_pred_c_evol)

@@ -34,7 +34,7 @@ flare_list["noaa_ar"] = flare_list["noaa_ar"].astype(str)
 flare_list = flare_list[~flare_list["noaa_ar"].isin(["0"])]
 
 #  only want these columns
-flare_list_df = flare_list[["matchtime", "goes_class_ind", "noaa_ar"]]
+flare_list_df = flare_list[["matchtime", "goes_class_ind", "noaa_ar", "goes_class"]]
 flare_list_df.reset_index(inplace=True, drop=True)
 
 # we want new columns that include number of X, C and M class flares, and also the X+, M+, and C+
