@@ -81,7 +81,6 @@ labels = data_ml["C+"].map(lambda x: 1 if x>0 else 0)
 ## split testing and training data
 X_train, X_test, Y_train, Y_test = train_test_split(features.values, labels.values, test_size=0.3, shuffle=False)
 
-
 climatology = np.mean(Y_test)
 
 ####-------------------–--###
@@ -104,108 +103,7 @@ def do_ml(mdl, X_train, X_test, Y_train, Y_test):#, X_train=X_train, X_test=X_te
 mdl = LogisticRegression()
 tss, bss, trained_mdl = do_ml(mdl, X_train, X_test, Y_train, Y_test)
 
-####-------------------–--###
-#### K-fold cross-validation ##
 
-X = features.values
-Y = labels.values
-
-mdl = LogisticRegression()
-
-models = [LogisticRegression(), LinearDiscriminantAnalysis(), RandomForestClassifier(), GradientBoostingClassifier(), xgb.XGBClassifier()]
-model_names = ["LR", "LDA", "RF", "GB", "XGB"]
-
-tss_all = []
-bss_all = []
-kfl = StratifiedKFold(n_splits=10)
-for i in range(len(models)):
-    mdl = models[i]
-    print(mdl)
-    tss = []
-    bss = []
-
-    fig1, ax1 = plt.subplots()
-    fig2, ax2 = plt.subplots()
-
-    for k, (train_ind, test_ind) in enumerate(kfl.split(X, Y)):
-        print("Doing {:d} fold".format(k))
-        xtrain, xtest = X[train_ind], X[test_ind]
-        ytrain, ytest = Y[train_ind], Y[test_ind]
-        mdl.fit(xtrain, ytrain)
-        prediction = mdl.predict(xtest)
-        tss.append(get_tss(ytest, prediction))
-        bss.append(get_bss(Y_test, mdl.predict_proba(X_test)[:, 1]))
-        # plot roc curve
-        metrics.plot_roc_curve(mdl, xtest, ytest, drawstyle="steps-mid", ax=ax1)
-        ax1.set_title("ROC Curve {:s}".format(model_names[i]))
-        if hasattr(mdl, "predict_proba"):
-            prob_pos = mdl.predict_proba(xtest)[:, 1]
-        else: 
-            prob_pos = mdl.decision_function(xtest)
-            prob_pos = \
-                (prob_pos - prob_pos.min()) / (prob_pos.max() - prob_pos.min())
-
-        fraction_of_positives, mean_predicted_value = \
-            calibration_curve(ytest, prob_pos, n_bins=10)
-
-        ax2.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
-        ax2.plot(mean_predicted_value, fraction_of_positives, "s-")
-        ax2.set_ylabel("Fraction of positives")
-        ax2.set_xlabel("Mean predicted value")
-
-
-    tss_all.append(tss)
-    bss_all.append(bss)
-    fig1.tight_layout()
-    fig1.savefig("./overview_plots/ROC_kfold_{:s}.png".format(model_names[i]), dpi=300, bbox_inches="tight")
-
-
-    fig2.tight_layout()
-    fig2.savefig("./overview_plots/reliability_kfold_{:s}.png".format(model_names[i]), dpi=300, bbox_inches="tight")
-
-    plt.close()
-    plt.close()
-
-tss_df = pd.DataFrame(np.array(tss_all).T, columns=model_names)
-bss_df = pd.DataFrame(np.array(bss_all).T, columns=model_names)
-    
-
-
-fig, ax = plt.subplots()
-sns.boxplot(data=tss_df, ax=ax)
-ax.set_ylabel("TSS")
-ax.set_xlabel("ML Classifier")
-ax.set_title("K-Fold cross-validation (all data)")
-plt.tight_layout()
-plt.savefig("./overview_plots/tss_cross_val.png", dpi=300)
-
-
-
-fig, ax = plt.subplots()
-sns.boxplot(data=bss_df, ax=ax)
-ax.set_ylabel("BSS")
-ax.set_xlabel("ML Classifier")
-ax.set_title("K-Fold cross-validation (all data)")
-plt.tight_layout()
-plt.savefig("./overview_plots/bss_cross_val.png", dpi=300)
-
-    # metrics.plot_roc_curve(mdl, xtest, ytest, drawstyle="steps-mid", ax=ax)
-
-
-    # if hasattr(mdl, "predict_proba"):
-    #     prob_pos = mdl.predict_proba(xtest)[:, 1]
-    # else: 
-    #     prob_pos = mdl.decision_function(xtest)
-    #     prob_pos = \
-    #         (prob_pos - prob_pos.min()) / (prob_pos.max() - prob_pos.min())
-
-    # fraction_of_positives, mean_predicted_value = \
-    #     calibration_curve(ytest, prob_pos, n_bins=10)
-
-    # ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
-    # ax1.plot(mean_predicted_value, fraction_of_positives, "s-")
-    # ax1.set_ylabel("Fraction of positives")
-    # ax1.set_xlabel("Mean predicted value")
 
 
 
